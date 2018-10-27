@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_app/product_manager.dart';
-
 class ProductsPage extends StatelessWidget {
+  final List<Map<String, String>> products;
+  final Function addProduct;
+  final Function deleteProduct;
+
+  ProductsPage(this.products, this.addProduct, this.deleteProduct);
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -9,13 +13,15 @@ class ProductsPage extends StatelessWidget {
        child: Column(
          children: <Widget>[
            AppBar(automaticallyImplyLeading: false, title: Text('Choose'),),
-           ListTile(title: Text('Manage Products'), onTap: () {},)
+           ListTile(title: Text('Manage Products'), onTap: () {
+             Navigator.pushReplacementNamed(context, '/admin');
+           },)
          ],
        ),),
      appBar: AppBar(
        title: Text('Easy List'),
      ),
-     body: ProductManager(),
+     body: ProductManager(products, addProduct, deleteProduct),
    );
   }
 
