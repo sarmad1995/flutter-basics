@@ -1,36 +1,33 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../widgets/uielements/title_default.dart';
 
 class ProductPage extends StatelessWidget {
   final String title;
   final String imageUrl;
+  final String description;
+  final double price;
+  ProductPage(this.title, this.imageUrl, this.price, this.description);
 
-  ProductPage(this.title, this.imageUrl);
-
-  showWarningDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Are you sure?'),
-            content: Text('This action cannot be undone'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Discard'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              FlatButton(
-                child: Text('Continue'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context, true);
-                },
-              ),
-            ],
-          );
-        });
+  Widget _buildAddressPriceRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Some Address',
+          style: TextStyle(fontFamily: 'Oswald', color: Colors.grey),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 5.0),
+          child: Text(
+            '|',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        Text('\$${price.toString()}',
+            style: TextStyle(fontFamily: 'Oswald', color: Colors.grey))
+      ],
+    );
   }
 
   @override
@@ -49,10 +46,16 @@ class ProductPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Image.asset(imageUrl),
+              TitleDefault(title),
+              _buildAddressPriceRow(),
               Container(
                 padding: EdgeInsets.all(10.0),
-                child: Text(title),
-              ),
+                alignment: Alignment.center,
+                child: Text(
+                  description,
+                  textAlign: TextAlign.center,
+                ),
+              )
             ],
           ),
         ));
