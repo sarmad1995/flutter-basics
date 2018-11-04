@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../helpers/ensure-visible.dart';
+import '../models/product.dart';
 
 class ProductEditPage extends StatefulWidget {
   final Function addProduct;
   final Function updateProduct;
-  final Map<String, dynamic> product;
+  final Product product;
   final int productIndex;
   ProductEditPage(
       {this.product, this.addProduct, this.updateProduct, this.productIndex});
@@ -32,7 +33,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         child: TextFormField(
             focusNode: titleFocusNode,
             decoration: InputDecoration(labelText: 'Product Title'),
-            initialValue: widget.product == null ? '' : widget.product['title'],
+            initialValue: widget.product == null ? '' : widget.product.title,
             validator: (String value) {
               if (value.isEmpty || value.length < 5) {
                 return 'Title should be more then 5 characters';
@@ -48,7 +49,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
             focusNode: descriptionFocusNode,
             decoration: InputDecoration(labelText: 'Product Description'),
             initialValue:
-                widget.product == null ? '' : widget.product['description'],
+                widget.product == null ? '' : widget.product.description,
             validator: (String value) {
               if (value.isEmpty || value.length < 10) {
                 return 'Description  should be more then 10 characters';
@@ -64,9 +65,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
         child: TextFormField(
             focusNode: priceFocusNode,
             decoration: InputDecoration(labelText: 'Product Price'),
-            initialValue: widget.product == null
-                ? ''
-                : widget.product['price'].toString(),
+            initialValue:
+                widget.product == null ? '' : widget.product.price.toString(),
             validator: (String value) {
               if (value.isEmpty ||
                   !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
@@ -84,19 +84,28 @@ class _ProductEditPageState extends State<ProductEditPage> {
     }
     _formKey.currentState.save();
     if (widget.product == null) {
-      widget.addProduct(_formData);
+      widget.addProduct(Product(
+          title: _formData['title'],
+          description: _formData['description'],
+          image: _formData['image'],
+          price: _formData['price']));
     } else {
-      widget.updateProduct(widget.productIndex, _formData);
+      widget.updateProduct(
+          widget.productIndex,
+          Product(
+              title: _formData['title'],
+              description: _formData['description'],
+              image: _formData['image'],
+              price: _formData['price']));
     }
     Navigator.pushReplacementNamed(context, '/products');
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildPageContent(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
-    final Widget pageContent = GestureDetector(
+    return GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
         child: Container(
             margin: EdgeInsets.all(10.0),
@@ -120,6 +129,11 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 ],
               ),
             )));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget pageContent = _buildPageContent(context);
     return widget.product == null
         ? pageContent
         : Scaffold(
