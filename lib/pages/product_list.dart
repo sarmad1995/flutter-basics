@@ -12,7 +12,7 @@ class ProductListPage extends StatelessWidget {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return ProductEditPage();
-        }));
+        })).then((_) => model.selectProduct(null));
       },
     );
   }
@@ -36,17 +36,18 @@ class ProductListPage extends StatelessWidget {
             background: Container(
               color: Colors.red,
             ),
-            key: Key(model.products[index].title),
+            key: Key(model.allProducts[index].title),
             child: Column(
               children: <Widget>[
                 ListTile(
                   leading: CircleAvatar(
                     backgroundImage: AssetImage(
-                      model.products[index].image,
+                      model.allProducts[index].image,
                     ),
                   ),
-                  title: Text(model.products[index].title),
-                  subtitle: Text('\$${model.products[index].price.toString()}'),
+                  title: Text(model.allProducts[index].title),
+                  subtitle:
+                      Text('\$${model.allProducts[index].price.toString()}'),
                   trailing: _buildEditIcon(context, index, model),
                 ),
                 Divider()
