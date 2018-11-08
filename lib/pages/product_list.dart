@@ -54,7 +54,7 @@ class ProductListPage extends StatelessWidget {
             ),
           );
         },
-        itemCount: model.products.length,
+        itemCount: model.allProducts.length,
       );
     });
   }
