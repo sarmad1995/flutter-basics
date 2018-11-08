@@ -3,6 +3,8 @@ import './price_tag.dart';
 import '../uielements/title_default.dart';
 import './address_tag.dart';
 import '../../models/product.dart';
+import 'package:scoped_model/scoped_model.dart';
+import '../../scoped-models/main.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -35,10 +37,19 @@ class ProductCard extends StatelessWidget {
                   context, '/product/' + productIndex.toString())
               .then((value) {}),
         ),
-        IconButton(
-            icon: Icon(Icons.favorite_border),
-            color: Colors.red,
-            onPressed: () => {})
+        ScopedModelDescendant<MainModel>(
+          builder: (BuildContext context, Widget child, MainModel model) {
+            return IconButton(
+                icon: Icon(model.products[productIndex].isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                color: Colors.red,
+                onPressed: () {
+                  model.selectProduct(productIndex);
+                  model.toggleProductFavoriteStatus();
+                });
+          },
+        ),
       ],
     );
   }
