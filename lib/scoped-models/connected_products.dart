@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:scoped_model/scoped_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 import '../models/product.dart';
 import '../models/user.dart';
 
@@ -6,17 +10,44 @@ class ConnectedProductsModel extends Model {
   List<Product> _products = [];
   User _authenticatedUser;
   int _selfProductIndex;
+  bool _isLoading = false;
 
-  void addProduct(
-      String title, String description, String image, double price) {
-    final Product newProduct = Product(
-        title: title,
-        description: description,
-        image: image,
-        price: price,
-        userEmail: _authenticatedUser.email,
-        userId: _authenticatedUser.id);
-    _products.add(newProduct);
+  Future<bool> addProduct(
+      String title, String description, String image, double price) async {
+    _isLoading = true;
+    notifyListeners();
+    final Map<String, dynamic> productData = {
+      'title': title,
+      'description': description,
+      'image':
+          'https://cdn.pixabay.com/photo/2015/10/02/12/00/chocolate-968457_960_720.jpg',
+      'price': price,
+      'userEmail': _authenticatedUser.email,
+      'userId': _authenticatedUser.id
+    };
+    try {
+      final http.Response response = await http.post(
+          'https://flutter-products-fcd4d.firebaseio.com/products.json',
+          body: json.encode(productData));
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      print(responseData);
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+      _products.add(newProduct);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print(e);
+
+      return false;
+    }
   }
 }
 
@@ -51,6 +82,39 @@ class ProductsModel extends ConnectedProductsModel {
   void deleteProduct() {
     _products.removeAt(selectedProductIndex);
     notifyListeners();
+  }
+
+  void fetchProducts() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await http
+          .get('https://flutter-products-fcd4d.firebaseio.com/products.json');
+      print(json.decode(response.body));
+      final List<Product> fetchedProductList = [];
+      final Map<String, dynamic> productListData = json.decode(response.body);
+      if (productListData == null) {
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+      productListData.forEach((String productId, dynamic productData) {
+        final Product product = Product(
+            id: productId,
+            title: productData['title'],
+            description: productData['description'],
+            image: productData['image'],
+            price: productData['price'],
+            userEmail: productData['userEmail'],
+            userId: productData['userId']);
+        fetchedProductList.add(product);
+      });
+      _products = fetchedProductList;
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
   }
 
   void toggleProductFavoriteStatus() {
@@ -98,6 +162,12 @@ class UserModel extends ConnectedProductsModel {
     print(email);
     print(password);
     _authenticatedUser = User(id: 'id', email: email, password: password);
+  }
+}
+
+class UtilityModel extends ConnectedProductsModel {
+  bool get isLoading {
+    return _isLoading;
   }
 }
 // mixin UserModel on ConnectedProductsModel {...}

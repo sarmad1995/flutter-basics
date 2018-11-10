@@ -73,32 +73,43 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   void _submitForm(
       Function addProduct, Function updateProduct, Function setSelectedProduct,
-      [int selectedProductIndex]) {
+      [int selectedProductIndex]) async {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == null) {
-      addProduct(_formData['title'], _formData['description'],
-          _formData['image'], _formData['price']);
+      final response = await addProduct(_formData['title'],
+          _formData['description'], _formData['image'], _formData['price']);
+      if (response) {
+        Navigator.pushReplacementNamed(context, '/products')
+            .then((_) => setSelectedProduct(null));
+      }
     } else {
-      updateProduct(_formData['title'], _formData['description'],
-          _formData['image'], _formData['price']);
+      final response = updateProduct(_formData['title'],
+          _formData['description'], _formData['image'], _formData['price']);
+      if (response) {
+        Navigator.pushReplacementNamed(context, '/products')
+            .then((_) => setSelectedProduct(null));
+      }
     }
-    Navigator.pushReplacementNamed(context, '/products')
-        .then((_) => setSelectedProduct(null));
   }
 
   Widget _buildSubmitButton() {
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
-        return RaisedButton(
-          color: Theme.of(context).accentColor,
-          textColor: Colors.white,
-          child: Text('Save'),
-          onPressed: () => _submitForm(model.addProduct, model.updateProduct,
-              model.selectProduct, model.selectedProductIndex),
-        );
+        return model.isLoading
+            ? Center(child: CircularProgressIndicator())
+            : RaisedButton(
+                color: Theme.of(context).accentColor,
+                textColor: Colors.white,
+                child: Text('Save'),
+                onPressed: () => _submitForm(
+                    model.addProduct,
+                    model.updateProduct,
+                    model.selectProduct,
+                    model.selectedProductIndex),
+              );
       },
     );
   }
