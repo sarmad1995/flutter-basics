@@ -86,7 +86,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
             .then((_) => setSelectedProduct(null));
       }
     } else {
-      final response = updateProduct(_formData['title'],
+      final response = await updateProduct(_formData['title'],
           _formData['description'], _formData['image'], _formData['price']);
       if (response) {
         Navigator.pushReplacementNamed(context, '/products')
