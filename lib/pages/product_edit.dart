@@ -78,18 +78,33 @@ class _ProductEditPageState extends State<ProductEditPage> {
       return;
     }
     _formKey.currentState.save();
-    if (selectedProductIndex == null) {
+    if (selectedProductIndex == -1) {
       final response = await addProduct(_formData['title'],
           _formData['description'], _formData['image'], _formData['price']);
       if (response) {
-        Navigator.pushReplacementNamed(context, '/products')
+        Navigator.pushReplacementNamed(context, '/')
             .then((_) => setSelectedProduct(null));
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Something went wrong'),
+                content: Text('please try again'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Okay'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  )
+                ],
+              );
+            });
       }
     } else {
       final response = await updateProduct(_formData['title'],
           _formData['description'], _formData['image'], _formData['price']);
       if (response) {
-        Navigator.pushReplacementNamed(context, '/products')
+        Navigator.pushReplacementNamed(context, '/')
             .then((_) => setSelectedProduct(null));
       }
     }
@@ -146,7 +161,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         final Widget pageContent =
             _buildPageContent(context, model.selectedProduct);
 
-        return model.selectedProductIndex == null
+        return model.selectedProductIndex == -1
             ? pageContent
             : Scaffold(
                 appBar: AppBar(title: Text('Edit Product')),
